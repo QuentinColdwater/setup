@@ -1,0 +1,48 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          docker-machine
+# Required-Start:    docker $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+set -xe
+
+dir=""
+cmd="/usr/local/bin/docker-machine"
+user="coventry"
+
+if [ "x$USER" != "x$user" ] ; then
+    echo "Re-running as $user"
+    sudo -Eu $user $0 "$@"
+fi
+
+name=`basename $0`
+stdout_log=~/.docker/$name.log
+stderr_log=~/.docker/$name.err
+
+is_running() {
+    docker-machine ls | egrep '^default .* Running '
+}
+
+case "$1" in
+    start)
+        sudo -Eu "$user" $cmd start >> "$stdout_log" 2>> "$stderr_log" &
+    ;;
+    stop)
+	sudo -Eu "$user" $cmd stop
+    ;;
+    restart)
+	sudo -Eu "$user" $cmd stop
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0
+Status 
